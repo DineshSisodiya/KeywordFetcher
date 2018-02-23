@@ -12,7 +12,7 @@ class KeywordFetcher
 	  *@return $kwArray - String (contains keywords matched)
 	  */
 	private function extractKW($post,$trieObj) {
-		$ignore_chars=['.','&','!','@','-','_','`','~','#','$','*','(',')','+','-','/','\\','|','{','}','[',']','"','<','>','?'];
+		$ignore_chars=[',','.','&','!','@','-','_','`','~','#','$','*','(',')','+','-','/','\\','|','{','}','[',']','"','<','>','?'];
 		$ignore_chars_pos=array();
 		$post=strtolower($post.' ');//avoid case sensitivity
 		$kwArray=array();
@@ -44,7 +44,7 @@ class KeywordFetcher
 					$status=$trieObj->search($temp_str);
 				}
 				if ($status[1]) {
-					$kwArray[$k++]=$temp_pre.' '.$temp_str;
+					$kwArray[$k++]=trim($temp_pre.' '.$temp_str);
 					$temp_pre=$temp_pre.' '.$temp_str;
 				} 
 				else if ($status[0]==strlen($temp_str)) {	
@@ -71,30 +71,74 @@ class KeywordFetcher
 	{
 		try{
 			if(empty($kwfiles)) {
-				$kwfiles=['subjectFile'=>__DIR__."/keywords files/subject.txt",'categoryFile'=>__DIR__."/keywords files/category.txt",'level1File'=>__DIR__."/keywords files/key1.txt",'level2File'=>__DIR__."/keywords files/key2.txt",'level3File'=>__DIR__."/keywords files/key3.txt"];
+				$kwfiles=['subjectFile'=>"./keywords files/subject.txt",'categoryFile'=>"./keywords files/category.txt",'level1File'=>"./keywords files/key1.txt",'level2File'=>"./keywords files/key2.txt",'level3File'=>"./keywords files/key3.txt"];
 			}
-
+			 
 			$level3_kw=file($kwfiles['level3File'], FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 			if(!$level3_kw)
 				throw new Exception("Keyword file for level-3 may be missing or not readable");
 			
-			$trieObj=new Trie;
-			$keywords=['subject'=>array(),'category'=>array(),'level1'=>array(),'level2'=>array(),'level3'=>array()];
-			$total_kw=count($level3_kw);
-			for ($i=0; $i < $total_kw; $i++) { 
-				$level3_kw[$i]=strtolower(trim($level3_kw[$i])); //avoid case sensitivity
-				$trieObj->add(trim($level3_kw[$i]));
+			// check if trie file is modified
+			$trie_mtime_file=fopen("./keywords files/trie_mt.txt",'r');
+			$trie_mtime=null;
+			if (!$trie_mtime_file) {
+				$trie_mtime_file=fopen('./keywords files/trie_mt.txt','w');
+			}
+			else {
+				$trie_mtime=fgets($trie_mtime_file);
+			}
+			fclose($trie_mtime_file);
+
+			$trieObj=null;
+			$trie_mtime_new=filemtime($kwfiles['level3File']);
+			if ($trie_mtime_new==$trie_mtime) {
+				// no need to compute trie again
+				$trieCont=file_get_contents('./keywords files/trie.txt');
+				$trieObj=unserialize($trieCont);
+				unset($trieCont);
+				unset($trie_mtime);
+				unset($trie_mtime_new);
+			}
+			else {
+				// compute trie again
+				$trieObj=new Trie;
+				$total_kw=count($level3_kw);
+				for ($i=0; $i < $total_kw; $i++) { 
+					$level3_kw[$i]=strtolower(trim($level3_kw[$i])); //avoid case sensitivity
+					$trieObj->add(trim($level3_kw[$i]));
+				}
+				unset($total_kw);
+
+				// write trie to trie.txt again
+				$trieFile=fopen("./keywords files/trie.txt", 'w');
+				$trieFileCont=serialize($trieObj);
+				fwrite($trieFile, $trieFileCont);
+				fclose($trieFile);
+				unset($trieFileCont);
+				// write new modified time
+				file_put_contents('./keywords files/trie_mt.txt', $trie_mtime_new);
+				unset($trie_mtime_new);
 			}
 
+			$keywords=['subject'=>array(),'category'=>array(),'level1'=>array(),'level2'=>array(),'level3'=>array()];
+
 			$keywords['level3']=array_values($this->extractKW($postCont,$trieObj));
+
+			$level3_kw_new=array();
+			foreach ($level3_kw as $key=>$val) {
+				$val=strtolower(trim($val)); //avoid case sensitivity and spaces
+				$level3_kw_new["$val"]=$key;
+			}
+
+			unset($level3_kw);
 
 			//finding the column of keyword 
 			$col_kw=array();
 			$col_no=0;
 			foreach ($keywords['level3'] as $key=>$val) {
-				$found=array_search(trim($val), $level3_kw);
-				if($found) {
-					$col_kw[$col_no++]=$found;
+				$val=strtolower(trim($val)); //avoid case sensitivity and spaces
+				if(isset($level3_kw_new[$val])) {
+					$col_kw[$col_no++]=$level3_kw_new[$val];
 				}
 			}
 
@@ -135,6 +179,11 @@ class KeywordFetcher
 			echo "Error: ".$fileExp->getMessage();
 		}
 	}
+
+	/**
+	* @param $kwfiles - array (optional)
+	* @return nothing, directly updates in DB
+	*/
 	public function multiFetchKeywords($kwfiles=null) 
 	{
 		try{
@@ -175,6 +224,100 @@ class KeywordFetcher
 		else
 		{
 			return $update_failed;
+		}
+	}
+
+	/**
+	* @param $id - integer 
+	* @return $post - string
+	*/
+	private function getPost($id) {
+			$DB=new DBconfig();
+			$con=$DB->connect();
+
+			$query="SELECT `query` FROM `admito_posts` WHERE `id`=$id";
+			$result=$con->query($query);
+			
+			if (!$result) {
+				throw new Exception("Server is busy", 1);
+			}
+			else {
+				$post=mysqli_fetch_assoc($result);
+				return $post;
+			}
+	}
+	/**
+	* @param $id - integer, $keywords - array
+	* @return bool, true on success
+	*/
+	private function updateKeywords($id,$keywords) {
+			$DB=new DBconfig();
+			$con=$DB->connect();
+			$update_failed=array();
+			$fail=0;
+			$total_kw=count($keywords['level3']);
+			for($i=0;$i<$total_kw;$i++) 
+			{
+					$query='INSERT INTO `keywords` (`pid`, `subject`, `category`, `level1`, `level2`, `level3`) values('.$id.',"'.$keywords['subject'][$i].'","'.$keywords['category'][$i].'","'.$keywords['level1'][$i].'","'.$keywords['level2'][$i].'","'.$keywords['level3'][$i].'")';
+					if(!$con->query($query))
+					{
+						$fail=1;
+					}
+			}
+			
+			if ($fail) {
+				return false;
+			}
+			else 
+				return true;
+	}
+	/**
+	* @param $pid - can be array or integer(required), 
+	*		 $kwfiles - array (optional)
+	*		 $get_kw - bool (optional)
+	* @return bool - false on failure 
+	*			   - true, if $get_kw=false on success
+	*			   - $keywords, if $get_kw=true on success
+	*/
+	public function FetchKeywordsById($pid,$get_kw=false,$kwfiles=null)
+	{
+		if (!is_array($pid)) {
+			$post = $this->getPost($pid);
+			$keywords = $this->fetchKeywords($post['query'],$kwfiles);
+			
+			// print_r($keywords);
+			$upd_status=$this->updateKeywords($pid,$keywords);
+			if($upd_status==true&&$get_kw==true) {
+				return $keywords;
+			}
+			else if($upd_status==true&&$get_kw==false) {
+				return true;
+			}
+			else {
+				return false;
+			}
+		}
+		else
+		{
+			$upd_status=true;
+			$kw_array=array();
+			foreach ($pid as $key => $id) {
+				$post = $this->getPost($id);
+				$keywords = $this->fetchKeywords($post['query'],$kwfiles);
+				array_push($kw_array,$keywords);
+				if(!$this->updateKeywords($id,$keywords)) {
+					$upd_status=false;
+				}
+			}
+			if($upd_status==true&&$get_kw==true) {
+					return $kw_array;
+			}
+			else if($upd_status==true&&$get_kw==false) {
+				return true;
+			}
+			else {
+				return false;
+			}
 		}
 	}
 	
