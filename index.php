@@ -9,7 +9,7 @@ function __autoload($class)
 $keywordFiles=['subjectFile'=>__DIR__."/keywords files/subject.txt",'categoryFile'=>__DIR__."/keywords files/category.txt",'level1File'=>__DIR__."/keywords files/key1.txt",'level2File'=>__DIR__."/keywords files/key2.txt",'level3File'=>__DIR__."/keywords files/key3.txt"];
 
 /*required parameter*/
-$post="If any one has filed for a retake in nmat, can you please please check if there indian institute of management, indore are dates available in chandigarh from 11 to girls hostels 16 faculty of management studies, university of delhi, delhi or in Lucknow? Please. Ex department of management studies, indian institute of technology delhi,";
+$post="If any one has filed for a retake in nmat, can you please please check if there indian institute of management, indore are dates available in chandigarh from 11 to girls hostels 16 faculty of management studies, university of delhi, delhi or in Lucknow? Please. Ex department of management studies, indian institute of technology delhi";
 
 $ob=new KeywordFetcher;
 /*
@@ -22,8 +22,8 @@ $keywords=$ob->fetchKeywords($post);
 *  alternate way
 *  $keywords=$ob->fetchKeywords($post,$keywordFiles); 
 */
-print_r($keywords);
 
+print("<pre>".print_r($keywords,true)."</pre>");
 
 // // fetching by post id's
 // // $keywordFiles is optional

@@ -6,6 +6,7 @@
  */
 class TrieNode {
     public $isWord=false;
+    public $col_num=-1;
     public $child=array();
 }
  
@@ -26,7 +27,7 @@ class Trie
 	 *@param $str : String
 	 *@return true if added else false
 	 */
-	function add($str)
+	function add($str,$col_num)
 	{
 
 		$str=strtolower($str);//avoid case sensitivity
@@ -52,7 +53,8 @@ class Trie
 				}
 			}
 			$temp->isWord=true;
-
+			$temp->col_num=$col_num;
+			
 			/* $str add status */
     		return true;
 		} 
@@ -90,6 +92,7 @@ class Trie
 		{
 			$status[0]=$count;
 			$status[1]=true;
+			$status[2]=$temp->col_num;
 			return $status;
 		} 
 		else 

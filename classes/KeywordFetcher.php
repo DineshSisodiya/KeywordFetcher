@@ -2,14 +2,11 @@
 // error_reporting(0);
 
 
-/**
-  *@function fetchKeywords($file1,$file2,$file3)
-  */
 class KeywordFetcher
 {
 	/**
 	  *@param $post - String, $trieObj - Object
-	  *@return $kwArray - String (contains keywords matched)
+	  *@return $kwArray - int (contains column num. of matched keywords)
 	  */
 	private function extractKW($post,$trieObj) {
 		$ignore_chars=[',','.','&','!','@','-','_','`','~','#','$','*','(',')','+','-','/','\\','|','{','}','[',']','"','<','>','?'];
@@ -44,7 +41,8 @@ class KeywordFetcher
 					$status=$trieObj->search($temp_str);
 				}
 				if ($status[1]) {
-					$kwArray[$k++]=trim($temp_pre.' '.$temp_str);
+					$kwArray[$k++]=trim($status[2]);
+					//$kwArray[$k++]=trim($temp_pre.' '.$temp_str);
 					$temp_pre=$temp_pre.' '.$temp_str;
 				} 
 				else if ($status[0]==strlen($temp_str)) {	
@@ -77,7 +75,7 @@ class KeywordFetcher
 			$level3_kw=file($kwfiles['level3File'], FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 			if(!$level3_kw)
 				throw new Exception("Keyword file for level-3 may be missing or not readable");
-			
+
 			// check if trie file is modified
 			$trie_mtime_file=fopen("./keywords files/trie_mt.txt",'r');
 			$trie_mtime=null;
@@ -105,7 +103,7 @@ class KeywordFetcher
 				$total_kw=count($level3_kw);
 				for ($i=0; $i < $total_kw; $i++) { 
 					$level3_kw[$i]=strtolower(trim($level3_kw[$i])); //avoid case sensitivity
-					$trieObj->add(trim($level3_kw[$i]));
+					$trieObj->add(trim($level3_kw[$i]),$i);
 				}
 				unset($total_kw);
 
@@ -122,57 +120,29 @@ class KeywordFetcher
 
 			$keywords=['subject'=>array(),'category'=>array(),'level1'=>array(),'level2'=>array(),'level3'=>array()];
 
-			$keywords['level3']=array_values($this->extractKW($postCont,$trieObj));
-
-			$level3_kw_new=array();
-			foreach ($level3_kw as $key=>$val) {
-				$val=strtolower(trim($val)); //avoid case sensitivity and spaces
-				$level3_kw_new["$val"]=$key;
-			}
-
-			unset($level3_kw);
-
-			//finding the column of keyword 
-			$col_kw=array();
-			$col_no=0;
-			foreach ($keywords['level3'] as $key=>$val) {
-				$val=strtolower(trim($val)); //avoid case sensitivity and spaces
-				if(isset($level3_kw_new[$val])) {
-					$col_kw[$col_no++]=$level3_kw_new[$val];
-				}
-			}
-
 			$level2_kw=file($kwfiles['level2File'], FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 			if(!$level2_kw)
 				throw new Exception("Keyword file for level-2 may be missing or not readable");
-			foreach($col_kw as $key=>$val)
-			{
-				array_push($keywords['level2'],$level2_kw[$val]);
-			}
-
 			$level1_kw=file($kwfiles['level1File'], FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 			if(!$level1_kw)
 				throw new Exception("Keyword file for level-1 may be missing or not readable");
-			foreach($col_kw as $key=>$val)
-			{
-				array_push($keywords['level1'],$level1_kw[$val]);
-			}
-
 			$category_kw=file($kwfiles['categoryFile'], FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 			if(!$category_kw)
 				throw new Exception("Keyword file for category may be missing or not readable");
-			foreach($col_kw as $key=>$val)
-			{
-				array_push($keywords['category'],$category_kw[$val]);
-			}
-
 			$subject_kw=file($kwfiles['subjectFile'], FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 			if(!$subject_kw)
 				throw new Exception("Keyword file for subject may be missing or not readable");
-			foreach($col_kw as $key=>$val)
-			{
-				array_push($keywords['subject'],$subject_kw[$val]);
+
+			$level3_kw_col=array_values($this->extractKW($postCont,$trieObj));
+
+			foreach ($level3_kw_col as $key=>$val) {
+				array_push($keywords['level3'],$level3_kw[$val]);
+				array_push($keywords['level2'],$level2_kw[$val]);
+				array_push($keywords['level1'],$level1_kw[$val]);
+				array_push($keywords['category'],$category_kw[$val]);
+			 	array_push($keywords['subject'],$subject_kw[$val]);
 			}
+			
 			return $keywords;
 
 		} catch (Exception $fileExp) {

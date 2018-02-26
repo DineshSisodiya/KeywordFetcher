@@ -15,29 +15,28 @@ $ob=new KeywordFetcher;
  *all levels keywords will be returned
  *output :: array('subject'=>array(),'category'=>array(),level1'=>array(),'level2'=>array()',level3'=>array())
  */
-$keywords=$ob->fetchKeywords($post,$keywordFiles); 
+// $keywords=$ob->fetchKeywords($post,$keywordFiles); 
 /*
 - alternate way
   $keywords=$ob->fetchKeywords($keywordFiles,$post); 
 */
-print_r($keywords);
+// print_r($keywords);
 
 
 // fetching by post id's
 // $keywordFiles is optional
 $postId=3000089;
-$ob->FetchKeywordsById($postId,$keywordFiles);
+// $ob->FetchKeywordsById($postId,$keywordFiles);
 /*
-* to get keywords returned
+* to get keywords 
 * $keywords = $ob->FetchKeywordsById($postId,true,$keywordFiles);
 */ 
+print_r($ob->FetchKeywordsById(array(3000004,3000089),true,$keywordFiles));
 
-//supplying multiple post id's
-$postIdArray[333210,3437051,3252352];
-$ob->FetchKeywordsById($postIdArray,$keywordFiles);
+// // or
+// $postIdArray[3330,34351,3252352];
+// $ob->FetchKeywordsById($postIdArray,$keywordFiles);
 
 
 //for multi post or on table
-$ob->multiFetchKeywords();
-//or
-$ob->multiFetchKeywords($keywordFiles);
+// $ob->multiFetchKeywords($keywordFiles);
