@@ -1,7 +1,15 @@
 <?php
 /**
+  *@author - Dinesh Sisodiya
+  *@contact - dksisodiya.me
+  *@github - https://github.com/DineshSisodiya
+  */
+
+
+/**
  * this class is node of trie data structure 
  * $isWord = bool
+ * $col_num = int 
  * $child = []
  */
 class TrieNode {
