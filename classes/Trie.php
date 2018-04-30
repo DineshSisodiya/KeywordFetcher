@@ -1,15 +1,7 @@
 <?php
 /**
-  *@author - Dinesh Sisodiya
-  *@contact - dksisodiya.me
-  *@github - https://github.com/DineshSisodiya
-  */
-
-
-/**
  * this class is node of trie data structure 
  * $isWord = bool
- * $col_num = int 
  * $child = []
  */
 class TrieNode {
@@ -111,13 +103,44 @@ class Trie
 	}
 }
 
-/* for debugging this script uncomment below */
-
 // $ob=new Trie;
-// $ob->add('indian institute of management, ahmedabad',11);
-// $ob->add('iima',20);
-// $ob->add('faculty of management studies, university of delhi, delhi',42);
-// $ob->add('faculty of management studies',24);
+// $ob->add('indian institute of management, ahmedabad');
+// $ob->add('iima');
+// $ob->add('faculty of management studies, university of delhi, delhi');
+// $ob->add('faculty of management studies');
 //$status=$ob->search('faculty of management studies');
 
+
+// $post="faculty of management studies , delhi fms iimb sir i want to get iima iim admition in but i have a poor academic score in 2 i have 46% marks only and in graduation i have 51 % and in 10th i have 78 % so sir how can i now strengthen this weakness on mine while in pi i shouldn&#39t face much difficulty plz give some useful tips #gdpi18";
+// $kwArray=array();
+// $len=strlen($post);
+// $temp_str='';
+// $k=0;
+
+// for ($i=0; $i<$len; $i++) { 
+// 			if($post[$i]==' ') {
+// 				$status=$ob->search($temp_str);
+// 				if ($status[1]) {
+// 					$kwArray[$k++]=$temp_str;
+// 					$temp_str='';
+// 					print_r($kwArray);
+// 				} 
+// 				else if($status[0]==strlen($temp_str)) {
+// 					//echo '<br>'.$temp_str.'<br>';
+// 					$temp_str .= $post[$i];
+// 				}
+// 				else {
+// 					$temp_str='';
+// 				}
+// 			} 
+// 			else {
+// 				$temp_str .= $post[$i];
+// 			}
+// 		}
+
+
+
+//for checking execution time of the script
+// $time = microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"];
+// echo "Process Time: {$time}";
 ?>

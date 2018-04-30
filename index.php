@@ -6,7 +6,7 @@ function __autoload($class)
 }
 
 /*optional parameter*/
-$keywordFiles=['subjectFile'=>__DIR__."/keywords files/subject.txt",'categoryFile'=>__DIR__."/keywords files/category.txt",'level1File'=>__DIR__."/keywords files/key1.txt",'level2File'=>__DIR__."/keywords files/key2.txt",'level3File'=>__DIR__."/keywords files/key3.txt"];
+$keywordFiles=['clgIdFile'=>"./keywords files/clgId.txt",'subjectFile'=>__DIR__."/keywords files/subject.txt",'categoryFile'=>__DIR__."/keywords files/category.txt",'level1File'=>__DIR__."/keywords files/key1.txt",'level2File'=>__DIR__."/keywords files/key2.txt",'level3File'=>__DIR__."/keywords files/key3.txt"];
 
 /*required parameter*/
 $post="If any one has filed for a retake in nmat, can you please please check if there indian institute of management, indore are dates available in chandigarh from 11 to girls hostels 16 faculty of management studies, university of delhi, delhi or in Lucknow? Please. Ex department of management studies, indian institute of technology delhi";
@@ -17,13 +17,13 @@ $ob=new KeywordFetcher;
  *all levels keywords will be returned
  *output :: array('subject'=>array(),'category'=>array(),level1'=>array(),'level2'=>array()',level3'=>array())
  */
-$keywords=$ob->fetchKeywords($post); 
+// $keywords=$ob->fetchKeywords($post); 
 /*
 *  alternate way
 *  $keywords=$ob->fetchKeywords($post,$keywordFiles); 
 */
 
-print("<pre>".print_r($keywords,true)."</pre>");
+// print("<pre>".print_r($keywords,true)."</pre>");
 
 // // fetching by post id's
 // // $keywordFiles is optional
@@ -40,6 +40,6 @@ print("<pre>".print_r($keywords,true)."</pre>");
 
 
 //for multi post or on table
-// $ob->multiFetchKeywords($keywordFiles);
+$ob->multiFetchKeywords($keywordFiles);
 
 ?>

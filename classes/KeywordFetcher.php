@@ -1,10 +1,4 @@
 <?php
-/**
-  *@author - Dinesh Sisodiya
-  *@contact - dksisodiya.me
-  *@github - https://github.com/DineshSisodiya
-  */
-
 // error_reporting(0);
 
 
@@ -75,7 +69,7 @@ class KeywordFetcher
 	{
 		try{
 			if(empty($kwfiles)) {
-				$kwfiles=['subjectFile'=>"./keywords files/subject.txt",'categoryFile'=>"./keywords files/category.txt",'level1File'=>"./keywords files/key1.txt",'level2File'=>"./keywords files/key2.txt",'level3File'=>"./keywords files/key3.txt"];
+				$kwfiles=['clgIdFile'=>"./keywords files/clgId.txt",'subjectFile'=>"./keywords files/subject.txt",'categoryFile'=>"./keywords files/category.txt",'level1File'=>"./keywords files/key1.txt",'level2File'=>"./keywords files/key2.txt",'level3File'=>"./keywords files/key3.txt"];
 			}
 			 
 			$level3_kw=file($kwfiles['level3File'], FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
@@ -124,7 +118,7 @@ class KeywordFetcher
 				unset($trie_mtime_new);
 			}
 
-			$keywords=['subject'=>array(),'category'=>array(),'level1'=>array(),'level2'=>array(),'level3'=>array()];
+			$keywords=['isClg'=>array(),'clgId'=>array(),'subject'=>array(),'category'=>array(),'level1'=>array(),'level2'=>array(),'level3'=>array()];
 
 			$level2_kw=file($kwfiles['level2File'], FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 			if(!$level2_kw)
@@ -138,6 +132,9 @@ class KeywordFetcher
 			$subject_kw=file($kwfiles['subjectFile'], FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 			if(!$subject_kw)
 				throw new Exception("Keyword file for subject may be missing or not readable");
+			$clgId_file=file($kwfiles['clgIdFile'], FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+			if(!$clgId_file)
+				throw new Exception("clgId file may be missing or not readable");
 
 			$level3_kw_col=array_values($this->extractKW($postCont,$trieObj));
 
@@ -147,6 +144,13 @@ class KeywordFetcher
 				array_push($keywords['level1'],$level1_kw[$val]);
 				array_push($keywords['category'],$category_kw[$val]);
 			 	array_push($keywords['subject'],$subject_kw[$val]);
+			 	if($category_kw[$val]=='collegen') {
+			 		array_push($keywords['isClg'],1);
+				 	array_push($keywords['clgId'],$clgId_file[$val]);
+			 	} else {
+			 		array_push($keywords['isClg'],0);
+			 		array_push($keywords['clgId'],'NA');
+			 	}
 			}
 			
 			return $keywords;
@@ -163,7 +167,7 @@ class KeywordFetcher
 	public function multiFetchKeywords($kwfiles=null) 
 	{
 		try{
-			ini_set('max_execution_time', 120);
+			ini_set('max_execution_time', 300);
 			$DB=new DBconfig();
 			$con=$DB->connect();
 
@@ -181,7 +185,7 @@ class KeywordFetcher
 				// update keywords in table
 				for($i=0;$i<$total_kw;$i++) 
 				{
-					$query='INSERT INTO `keywords` (`pid`, `subject`, `category`, `level1`, `level2`, `level3`) values('.$post["id"].',"'.$keywords['subject'][$i].'","'.$keywords['category'][$i].'","'.$keywords['level1'][$i].'","'.$keywords['level2'][$i].'","'.$keywords['level3'][$i].'")';
+					$query='INSERT INTO `keywords` (`isClg`,`clgId`,`pid`, `subject`, `category`, `level1`, `level2`, `level3`) values("'.$keywords['isClg'][$i].'","'.$keywords['clgId'][$i].'",'.$post["id"].',"'.$keywords['subject'][$i].'","'.$keywords['category'][$i].'","'.$keywords['level1'][$i].'","'.$keywords['level2'][$i].'","'.$keywords['level3'][$i].'")';
 					
 					if(!$con->query($query))
 					{

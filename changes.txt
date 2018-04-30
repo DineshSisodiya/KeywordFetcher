@@ -1,0 +1,7 @@
+1. performance improved
+2. trie computation is saved in file 
+   only computed if level3 keyword file changes
+3. ignoring comma may leads to change so many things almost the whole concept.this is producing so many errors. it's better to handle it letter.
+   it will require more time to think on it again.
+4. new functions added - fetchById() for single post or array
+ 
