@@ -2,7 +2,7 @@
 
 	
 	
-	WORKING DEMO AVAILABLE AT :  https://bit.ly/2Sjy9Lf
+	WORKING DEMO AVAILABLE AT :  https://desensitized-delimi.000webhostapp.com/
 
 
 
@@ -21,7 +21,7 @@ this information is a the features of the project are as follows :-
 
 to perform search on query it uses TRIE data structure. there are 6 text files that are used for different purposes like level3 is used to build trie & trie is saved into trie.txt to save time of rebuilding it if other files have not been changed, and other 4 used to find the exact keyword in normal form and trie_mt.txt file is used to store the last modified time of the trie.txt everytime it is checked and if it changes than new trie is computed otherwise old trie is read from trie.txt file.
  
-working demo is available here :  https://bit.ly/2Sjy9Lf
+working demo is available here :  https://desensitized-delimi.000webhostapp.com/
 
 
 
