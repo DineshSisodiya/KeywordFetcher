@@ -9,6 +9,30 @@
 
 
 ---------------------------------------------------------------------------------------------------------------------------------------
+=========================
+  Project description
+=========================
+
+the project titled "KeywordFetcher" works as an backend application developed with PHP & Mysql. It was developed to identify the useful keyword of information from the queries posted by the user on admito website. the useful information here means the info. like college names, cuttoff marks, reviews of colleges etc. the queries are analysed by the application in the backend and the identified output is update on the database. 
+this information is a the features of the project are as follows :- 
+1. identify keywords in post (string)
+2. identify keywords with post id in table
+3. identify keywords in whole table and save the result to db
+
+to perform search on query it uses TRIE data structure. there are 6 text files that are used for different purposes like level3 is used to build trie & trie is saved into trie.txt to save time of rebuilding it if other files have not been changed, and other 4 used to find the exact keyword in normal form and trie_mt.txt file is used to store the last modified time of the trie.txt everytime it is checked and if it changes than new trie is computed otherwise old trie is read from trie.txt file.
+ 
+working demo is available here :  https://bit.ly/2Sjy9Lf
+
+
+
+
+
+
+
+===============================
+     Code Discription
+===============================
+
 
 function __autoload($class)
 {
